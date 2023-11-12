@@ -1,5 +1,5 @@
 #include "../headers/Pomodoro.hpp"
-Pomodoro::Pomodoro() {}
+Pomodoro::Pomodoro() : workDuration(25), breakDuration(5) {}
 Pomodoro::Pomodoro(minutes wd, minutes bd) : workDuration(wd), breakDuration(bd) {}
 void startSession(void){
 
