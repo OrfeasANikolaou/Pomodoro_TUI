@@ -1,4 +1,5 @@
 #include <iostream>
+#include <ncurses/curses.h>
 #include "../headers/ncurses_helpers.hpp" // ncurses already included
 int main(void){
 	/* START INIT */
@@ -22,16 +23,21 @@ int main(void){
 
 	WINDOW* title_win = newwin(40, 150, LINES/2-20, COLS/2-75);
 	WINDOW* menu_win = newwin(38,148, LINES/2-19, COLS/2-74);
-	leaveok(title_win, 1);
-	leaveok(menu_win, 1);
-	move(0,0);
-	leaveok(stdscr, 1);
 	box(title_win, 0, 0);
 	box(menu_win, 0, 0);
 	mvwprintw(title_win,0,69,"POMODORO_TUI");
+	move(0,0);
+	
 	wrefresh(title_win);
 	wrefresh(menu_win);
+	refresh();
 
+	leaveok(stdscr, 1);
+	leaveok(menu_win, 1);
+	leaveok(title_win, 1);
+	
+	delwin(title_win);
+	delwin(menu_win);
 
 	getch();
 	endwin();
