@@ -1,3 +1,5 @@
+#ifndef _POMODORO_HPP
+#define _POMODORO_HPP
 #include <chrono>
 using namespace std::chrono;
 class Pomodoro{
@@ -13,3 +15,4 @@ class Pomodoro{
 		size_t sessionsCompleted;
 		minutes totalWorkTime;
 };
+#endif
