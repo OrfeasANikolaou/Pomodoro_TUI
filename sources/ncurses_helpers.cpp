@@ -1,7 +1,7 @@
 #include "../headers/ncurses_helpers.hpp"
 #include <string>
 void change_background_color(int color_pair){
-
+//cool cyan bacground
 	for (int i = 0; i < LINES; ++i){
 		move(i, 0);
 		chgat(-1, A_NORMAL, color_pair, NULL);
@@ -10,6 +10,10 @@ void change_background_color(int color_pair){
 
 }
 
+
+
+
+// error messages
 void message_no_colors(void){
 	std::string msg_1 = "Your terminal does not support ncurses colors.";
 	std::string msg_2 = "Please use one that does support them.";

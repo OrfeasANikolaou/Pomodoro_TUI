@@ -2,12 +2,15 @@
 #include "../headers/third_party/Catch2/catch.hpp"
 #include "../headers/Pomodoro.hpp"
 #include <chrono>
+
+//different simple unit tests to show how the constructo works
+
 TEST_CASE("test_case_pomodoro_constructor_1", "[pomodoro_constructor]"){
 	using namespace std::chrono;
 	
 	Pomodoro obj(0, 0);
-	REQUIRE(obj.GET_breakDuration() == minutes(1)); 
-	REQUIRE(obj.GET_workDuration() == minutes(1));
+	REQUIRE(obj.GET_breakDuration() == minutes(5)); 
+	REQUIRE(obj.GET_workDuration() == minutes(25));
 	
 }
 TEST_CASE("test_case_pomodoro_constructor_2", "[pomodoro_constructor]"){
@@ -23,7 +26,7 @@ TEST_CASE("test_case_pomodoro_constructor_3", "[pomodoro_constructor]"){
 	using namespace std::chrono;
 	
 	Pomodoro obj3(3, -2);
-	REQUIRE(obj3.GET_breakDuration() == minutes(1));
+	REQUIRE(obj3.GET_breakDuration() == minutes(5));
 	REQUIRE(obj3.GET_workDuration() == minutes(3));
 	
 }

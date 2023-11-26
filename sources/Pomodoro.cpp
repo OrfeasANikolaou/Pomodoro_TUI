@@ -1,11 +1,15 @@
 #include "../headers/Pomodoro.hpp"
 #include "../headers/ncurses_helpers.hpp"
 #include <chrono>
+#include <fstream>
+#include <ostream>
 #include <ncurses.h>
 #include <ncurses/curses.h>
 #include <thread>
 #include <iostream>
 
+
+// apocalyptic levels of spaghetti and repeated code because of rushing.
 void pomodoro_helper_countdown(bool& p, int& time, WINDOW* win, bool flag){
 	int xMax, yMax;
 	getmaxyx(win, yMax, xMax);
@@ -16,6 +20,7 @@ void pomodoro_helper_countdown(bool& p, int& time, WINDOW* win, bool flag){
 	std::string msg_5 = "Do you wish to continue with another Pomodoro session?";
 	mvwprintw(win, yMax/2+3, xMax/2-msg_5.length()/2, "                                                        ");
 	if (flag) { // work time
+		//basically the same as below no need to comment same thing until refactor
 		std::string msg_1 = "YOU HAVE TO FOCUS";
 		init_pair(3, COLOR_WHITE, COLOR_RED);
 		wattron(win,COLOR_PAIR(3));
@@ -42,6 +47,7 @@ void pomodoro_helper_countdown(bool& p, int& time, WINDOW* win, bool flag){
 									"Time remaining: %02d::%02d::%02d", hrs, mins, 0);	// ultra mega spaghetti
 	}
 	else { // break time
+		// messages
 		mvwprintw(win, yMax/2+4, xMax/2-msg_3.length()/2, "                                    ");
 		std::string msg_1 = "YOU HAVE TO RELAX";
 		init_pair(4, COLOR_WHITE, COLOR_GREEN);
@@ -56,19 +62,21 @@ void pomodoro_helper_countdown(bool& p, int& time, WINDOW* win, bool flag){
 		while (time){
 			mvwprintw(win,  yMax/2+4, xMax/2-msg_4.length()/2, "                                    ");
 																													//ncurses only loads this once because it's smart
+			// time remaning
 			while (p){std::this_thread::sleep_for(std::chrono::seconds(1));}
 				hrs  = time / 3600;					
 				mins = (time % 3600) / 60; 	 	
 				secs = time % 60;						 
 				mvwprintw(win, yMax/2-4, xMax/2-13,
-									"Time remaining: %04d::%02d::%02d", hrs, mins, secs);
+									"Time remaining: %02d::%02d::%02d", hrs, mins, secs);
 				wrefresh(win);
 				--time;
 				std::this_thread::sleep_for(std::chrono::seconds(1));			
 			
 		}
+				// must show 00:00:00 when timer ends
 				mvwprintw(win, yMax/2-4, xMax/2-13,
-									"Time remaining: %04d::%02d::%02d", hrs, mins, 0);	// ultra mega spaghetti
+									"Time remaining: %02d::%02d::%02d", hrs, mins, 0);	// ultra mega spaghetti
 		
 			mvwprintw(win, yMax/2+3, xMax/2-msg_5.length()/2, "%s", msg_5.c_str());
 	}
@@ -76,6 +84,7 @@ void pomodoro_helper_countdown(bool& p, int& time, WINDOW* win, bool flag){
 			wrefresh(win);
 }
 void pomodoro_helper_pause_resume(bool& p, int& time){
+	// press any key, it flips whether it's paused or not
 	while (time){
 		getch();
 		p = !p;
@@ -86,17 +95,17 @@ void pomodoro_helper_pause_resume(bool& p, int& time){
 Pomodoro::Pomodoro() : workDuration(std::chrono::minutes(25)), breakDuration(std::chrono::minutes(5)) {}
 Pomodoro::Pomodoro(int wd, int bd){
 	using namespace std::chrono;  
-if (wd == 0) this->workDuration = minutes(25);
+	//anything 0 or less gets set to default values 25/5
+	//anything too high will be set to a max of 24h
+if (wd <= 0) this->workDuration = minutes(25);
 else if (wd > 1440) this->workDuration = minutes(1440);
 else this->workDuration = minutes(wd);
 
-if (bd == 0) this->breakDuration = minutes(5);
+if (bd <= 0) this->breakDuration = minutes(5);
 else if (bd > 1440) this->breakDuration = minutes(1440);
 else this->breakDuration = minutes(bd);
-
-this->sessionsCompleted = 0;
-this->totalWorkTime = minutes(0);
 }
+
 
 
 void Pomodoro::startSession(WINDOW* w){
@@ -104,6 +113,8 @@ AGAIN:
 	bool paused = false;
   int time =  std::chrono::duration_cast<std::chrono::seconds>(this->workDuration).count(); // spaghetti
 //	int time = 5; /* COMMENT ABOVE LINE AND UNCOMMENT THIS ONE FOR TESTING */
+
+	//handles when work time
 	std::thread countdown_thread1(pomodoro_helper_countdown, std::ref(paused), std::ref(time), std::ref(w), 1);	
 	std::thread pause_resume_thread1(pomodoro_helper_pause_resume, std::ref(paused), std::ref(time));
 	while (! countdown_thread1.joinable());
@@ -112,6 +123,8 @@ AGAIN:
 	pause_resume_thread1.join();
 	time = std::chrono::duration_cast<std::chrono::seconds>(this->breakDuration).count(); // more spaghetti
 //	time = 5; /* COMMENT ABOVE LINE AND UNCOMMENT THIS ONE FOR TESTING */
+
+	// handles when rest time
 	std::thread countdown_thread2(pomodoro_helper_countdown, std::ref(paused), std::ref(time), std::ref(w), 0);	
 	std::thread pause_resume_thread2(pomodoro_helper_pause_resume, std::ref(paused), std::ref(time));
 	while (! countdown_thread2.joinable());
@@ -120,10 +133,12 @@ AGAIN:
 	pause_resume_thread2.join();
 	this->totalWorkTime += this->workDuration;
 	this->sessionsCompleted++;
-	if (this->endSession(w)) goto AGAIN;
+	this->input_data_to_file("data.txt");	
+	if (this->endSession(w)) goto AGAIN;	// if endsession decides to start again goes to top of the function
 }
 
 bool Pomodoro::endSession(WINDOW* w){
+	// handles whether to continue with another work-rest session or to stop
 	bool ret = false;
 	std::string choices[] = {"Yes! I'd love to!","Please no...", };
 	size_t hl = 0;
@@ -136,7 +151,6 @@ bool Pomodoro::endSession(WINDOW* w){
 		for (size_t i = 0; i < n_choices; ++i){
 			if (i == hl) { wattron(choice, A_REVERSE); wattron(choice, A_BLINK); }
 			mvwprintw(choice, i+1 , 1, "%s", choices[i].c_str());
-			wattroff(choice, A_REVERSE); wattroff(choice, A_BLINK);
 		}
 		int c = wgetch(choice);
 		keypad(choice, 1);
@@ -157,13 +171,45 @@ bool Pomodoro::endSession(WINDOW* w){
 	refresh();
 	return ret;
 }
+
+void Pomodoro::set_data_from_file(char const* const namefile){
+	std::ifstream f(namefile);
+	int x, y;
+	if (f){
+		f>>x;
+		f>>y;
+	}	
+}
+
+
+
+void Pomodoro::input_data_to_file(char const* const namefile){
+	std::ofstream f(namefile);
+	if (f){
+		f << this->totalWorkTime.count() << std::endl;
+		f << this->sessionsCompleted << std::endl;
+	}
+
+}
+
 // πολυ αστειο ονομα επειδη δεν μπορω να βαλω this ως ονομα, αλλα αναφαιρομαι στο παραθυρο για στατιστικα
 void Pomodoro::getStatistics(WINDOW* ekeino){
-	
+	std::ifstream f("data.txt");
+	int x, y;
+		if (f){
+		f >> x;	//to be deprecated sunarthsh
+		f >> y;
+		mvwprintw(ekeino, 1,1, "totalWorkTime: %d" ,x);
+		mvwprintw(ekeino, 2,1, "sessionsCompleted: %d", y);
+		wrefresh(ekeino);
+	}
+	// read stats from file and print them	
 }
 
 /* intended for test cases */
 
+
+//getters
 std::chrono::minutes Pomodoro::GET_breakDuration(void) const {
 	return this->breakDuration;
 }
