@@ -36,13 +36,14 @@ void MenuBar::draw(void){
 	this->selected_menu = -1;
 }
 
-void MenuBar::handle_trigger(int trigger){
+int MenuBar::handle_trigger(int trigger){
 	for (int i = 0; i < this->num_menus; ++i){
 		if (trigger == this->menus[i].trigger ||
 				trigger - 32 == this->menus[i].trigger){ /* ascii black magic so it works with capital */ 
-	 		this->selected_menu = i;							 /*	letters too */
+	 		this->selected_menu = i;							 																	  /* letters too */
 		}
 	}
+	return selected_menu; /* FILE = 0, OPTS = 1, HELP = 2 */
 }
 
 void MenuBar::reset(void){
@@ -73,6 +74,9 @@ void MenuBar::draw_menu(Menu menu, bool is_selected){
 			case KEY_DOWN: case 'j': case 'J':
 				menu.select_next_item();
 				break;
+			case '\n': // case fallthrough is intended
+				mvprintw(5,5, "%s", "please work");
+				refresh();
 			default:
 				is_selected = false;
 				break;

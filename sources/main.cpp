@@ -6,6 +6,7 @@
 enum mfile{new_session, statistics, quit};
 enum mopts{set_timer};
 enum mhelp{about};
+enum m{file, opts, help};
 int main(void){
 	/* START INIT */
 	initscr();

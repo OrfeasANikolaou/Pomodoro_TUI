@@ -21,7 +21,7 @@ class MenuBar{
 	public:
 		MenuBar(WINDOW* , Menu*, int); // In which window, array of menus, n. of menus
 		void draw(void);
-		void handle_trigger(int);
+		int handle_trigger(int);
 		void reset(void);
 		void draw_menu(Menu, bool);
 		void draw_menu_items(Menu);
