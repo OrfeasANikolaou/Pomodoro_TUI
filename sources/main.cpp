@@ -60,7 +60,6 @@ int main(void){
 	delwin(title_win);
 	delwin(menu_bar_win);
 
-	getch();
 	endwin();
 	return 0;
 }

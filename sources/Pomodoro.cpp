@@ -14,6 +14,7 @@ void pomodoro_helper_countdown(bool& p, int& time, WINDOW* win, bool flag){
 	std::string msg_3 = "Press any key to continue";
 	std::string msg_4 = "Press any key to start break";
 	std::string msg_5 = "Do you wish to continue with another Pomodoro session?";
+	mvwprintw(win, yMax/2+3, xMax/2-msg_5.length()/2, "                                                        ");
 	if (flag) { // work time
 		std::string msg_1 = "YOU HAVE TO FOCUS";
 		init_pair(3, COLOR_WHITE, COLOR_RED);
@@ -96,18 +97,18 @@ else this->breakDuration = minutes(bd);
 
 
 void Pomodoro::startSession(WINDOW* w){
+AGAIN:
 	bool paused = false;
 //  int time =  std::chrono::duration_cast<std::chrono::seconds>(this->workDuration).count(); // spaghetti
-	int time = 10;
+	int time = 3601; /* COMMENT ABOVE LINE AND UNCOMMENT THIS ONE FOR TESTING */
 	std::thread countdown_thread1(pomodoro_helper_countdown, std::ref(paused), std::ref(time), std::ref(w), 1);	
 	std::thread pause_resume_thread1(pomodoro_helper_pause_resume, std::ref(paused), std::ref(time));
 	while (! countdown_thread1.joinable());
 	while (! pause_resume_thread1.joinable());
 	countdown_thread1.join();
 	pause_resume_thread1.join();
-
 	// time = std::chrono::duration_cast<std::chrono::seconds>(this->breakDuration).count(); // more spaghetti
-	time = 10;
+	time = 3601; /* COMMENT ABOVE LINE AND UNCOMMENT THIS ONE FOR TESTING */
 	std::thread countdown_thread2(pomodoro_helper_countdown, std::ref(paused), std::ref(time), std::ref(w), 0);	
 	std::thread pause_resume_thread2(pomodoro_helper_pause_resume, std::ref(paused), std::ref(time));
 	while (! countdown_thread2.joinable());
@@ -115,7 +116,40 @@ void Pomodoro::startSession(WINDOW* w){
 	countdown_thread2.join();
 	pause_resume_thread2.join();
 
-	
+	std::string choices[] = {"Yes! I'd love to!","Please no...", };
+	size_t hl = 0;
+	size_t n_choices = sizeof(choices) / sizeof(std::string);
+	int yBeg = getbegy(w);
+	int xBeg = getbegx(w);
+	WINDOW* choice = newwin(4, 23, yBeg*2+2, xBeg*2-xBeg/2-16);
+	box(choice, 0, 0);
+	while(1){
+		for (size_t i = 0; i < n_choices; ++i){
+			if (i == hl) { wattron(choice, A_REVERSE); wattron(choice, A_BLINK); }
+			mvwprintw(choice, i+1 , 1, "%s", choices[i].c_str());
+			wattroff(choice, A_REVERSE); wattroff(choice, A_BLINK);
+		}
+		int c = wgetch(choice);
+		keypad(choice, 1);
+		switch(c){
+			case KEY_UP: case 'k': case 'K':
+				--hl;
+				if (hl > n_choices - 1) hl = 0;
+				break;
+			case KEY_DOWN: case 'j': case 'J':
+				++hl;
+				if (hl > n_choices - 1) hl = n_choices - 1;
+				break;
+			case '\n':
+				if (hl == 0) { wclear(choice); wrefresh(choice); delwin(choice); goto AGAIN; }
+				else goto EXIT;
+			default:
+				break;
+		}
+	}
+EXIT:
+	refresh();
+	wrefresh(choice);
 }
 
 void Pomodoro::endSession(void){

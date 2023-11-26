@@ -79,8 +79,8 @@ void MenuBar::handle_selection(int menu_id, int choice_id, Pomodoro& pom){
 					break;
 				}
 				case quit:{
-					mvprintw(0,0,"QUIT");
-					refresh();
+					endwin();
+					exit(0);
 					break;
 				}	
 			}
@@ -89,7 +89,7 @@ void MenuBar::handle_selection(int menu_id, int choice_id, Pomodoro& pom){
 		case opts:{
 			switch (choice_id){ /* selects the choice for OPTS menu */
 				case set_timer:{
-					mvprintw(0,0,"SETTING TIMER");
+//					mvprintw(0,0,"SETTING TIMER");
 					refresh();
 					break;
 				}
