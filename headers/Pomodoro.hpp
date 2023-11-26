@@ -10,7 +10,7 @@ class Pomodoro{
 		Pomodoro();
 		Pomodoro(int, int);				/* manages internally the numbers converting them to std::chrono::mins */ 
 		void startSession(WINDOW* );  /* starts user's session with given work and break duration */
-		void endSession(void);	  /* ends session with the possibility to continue */
+		bool endSession(WINDOW* );	  /* ends session and returns true if user wants another session*/
 		void getStatistics(WINDOW* ); /* prints statistics to given WINDOW* */
 		/* intended for test cases */
 		std::chrono::minutes GET_breakDuration(void) const;

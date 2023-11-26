@@ -93,29 +93,38 @@ else this->workDuration = minutes(wd);
 if (bd == 0) this->breakDuration = minutes(5);
 else if (bd > 1440) this->breakDuration = minutes(1440);
 else this->breakDuration = minutes(bd);
+
+this->sessionsCompleted = 0;
+this->totalWorkTime = minutes(0);
 }
 
 
 void Pomodoro::startSession(WINDOW* w){
 AGAIN:
 	bool paused = false;
-  int time =  std::chrono::duration_cast<std::chrono::seconds>(this->workDuration).count(); // spaghetti
-//	int time = 3601; /* COMMENT ABOVE LINE AND UNCOMMENT THIS ONE FOR TESTING */
+//  int time =  std::chrono::duration_cast<std::chrono::seconds>(this->workDuration).count(); // spaghetti
+	int time = 5; /* COMMENT ABOVE LINE AND UNCOMMENT THIS ONE FOR TESTING */
 	std::thread countdown_thread1(pomodoro_helper_countdown, std::ref(paused), std::ref(time), std::ref(w), 1);	
 	std::thread pause_resume_thread1(pomodoro_helper_pause_resume, std::ref(paused), std::ref(time));
 	while (! countdown_thread1.joinable());
 	while (! pause_resume_thread1.joinable());
 	countdown_thread1.join();
 	pause_resume_thread1.join();
-	time = std::chrono::duration_cast<std::chrono::seconds>(this->breakDuration).count(); // more spaghetti
-	//time = 3601; /* COMMENT ABOVE LINE AND UNCOMMENT THIS ONE FOR TESTING */
+	//time = std::chrono::duration_cast<std::chrono::seconds>(this->breakDuration).count(); // more spaghetti
+	time = 5; /* COMMENT ABOVE LINE AND UNCOMMENT THIS ONE FOR TESTING */
 	std::thread countdown_thread2(pomodoro_helper_countdown, std::ref(paused), std::ref(time), std::ref(w), 0);	
 	std::thread pause_resume_thread2(pomodoro_helper_pause_resume, std::ref(paused), std::ref(time));
 	while (! countdown_thread2.joinable());
 	while (! pause_resume_thread2.joinable());
 	countdown_thread2.join();
 	pause_resume_thread2.join();
+	this->totalWorkTime += this->workDuration;
+	this->sessionsCompleted++;
+	if (this->endSession(w)) goto AGAIN;
+}
 
+bool Pomodoro::endSession(WINDOW* w){
+	bool ret = false;
 	std::string choices[] = {"Yes! I'd love to!","Please no...", };
 	size_t hl = 0;
 	size_t n_choices = sizeof(choices) / sizeof(std::string);
@@ -141,8 +150,8 @@ AGAIN:
 				if (hl > n_choices - 1) hl = n_choices - 1;
 				break;
 			case '\n':
-				if (hl == 0) { wclear(choice); wrefresh(choice); delwin(choice); goto AGAIN; }
-				else goto EXIT;
+				{ wclear(choice); wrefresh(choice); delwin(choice); ret = true; }
+				goto EXIT;
 			default:
 				break;
 		}
@@ -150,10 +159,7 @@ AGAIN:
 EXIT:
 	refresh();
 	wrefresh(choice);
-}
-
-void Pomodoro::endSession(void){
-
+	return ret;
 }
 // πολυ αστειο ονομα επειδη δεν μπορω να βαλω this ως ονομα, αλλα αναφαιρομαι στο παραθυρο για στατιστικα
 void Pomodoro::getStatistics(WINDOW* ekeino){
