@@ -1,16 +1,16 @@
 #include "../headers/menu.hpp"
 #include <ncurses/curses.h>
-
+#include "../headers/enums.h"
 Menu::Menu(std::string txt, int trgr, std::string* itms, int n_items) :
 	text(txt), trigger(trgr), items(itms), num_items(n_items), selected_item(0) {}
 
 void Menu::select_next_item(void){
 	++this->selected_item;
-	if (this->selected_item >= this->num_items) this->selected_item = 0;
+	if (this->selected_item == this->num_items) this->selected_item = 0;
 }
 void Menu::select_previous_item(void){
 	--this->selected_item;
-	if (this->selected_item < 0) this->selected_item = num_items - 1;
+	if (this->selected_item == -1) this->selected_item = num_items - 1;
 }
 
 
@@ -31,19 +31,65 @@ MenuBar::MenuBar(WINDOW* w, Menu* m, int n) :
 
 void MenuBar::draw(void){
 	for (int i = 0; i < this->num_menus; ++i){
+		
+	refresh();
 		this->draw_menu(this->menus[i], this->selected_menu == i);
 	}
 	this->selected_menu = -1;
 }
 
-int MenuBar::handle_trigger(int trigger){
+void MenuBar::handle_trigger(int trigger){
 	for (int i = 0; i < this->num_menus; ++i){
 		if (trigger == this->menus[i].trigger ||
 				trigger - 32 == this->menus[i].trigger){ /* ascii black magic so it works with capital */ 
 	 		this->selected_menu = i;							 																	  /* letters too */
 		}
 	}
-	return selected_menu; /* FILE = 0, OPTS = 1, HELP = 2 */
+}
+
+void MenuBar::handle_selection(int menu_id, int choice_id){
+	switch (menu_id){
+		case file:{
+			switch (choice_id){ /* selects the choice for FILE menu */
+				case new_session:{
+					mvprintw(0,0,"NEW SESSION");
+					refresh();
+					break;
+				}
+				case statistics:{
+					mvprintw(0,0,"STATISTICS");
+					refresh();
+					break;
+				}
+				case quit:{
+					mvprintw(0,0,"QUIT");
+					refresh();
+					break;
+				}	
+			}
+			break;
+		}
+		case opts:{
+			switch (choice_id){ /* selects the choice for OPTS menu */
+				case set_timer:{
+					mvprintw(0,0,"SETTING TIMER");
+					refresh();
+					break;
+				}
+			}
+			break;
+		}
+		case help:{
+			switch (choice_id){ /* selects the choice for HELP menu */
+				case about:{
+					mvprintw(0,0,"ABOUT");
+					refresh();
+					break;
+				}
+			}
+			break;
+		}
+	}	
 }
 
 void MenuBar::reset(void){
@@ -68,15 +114,23 @@ void MenuBar::draw_menu(Menu menu, bool is_selected){
 	while (is_selected && 
 				(ch = wgetch(this->menu_win))){
 		switch(ch){
-			case KEY_UP: case 'k': case 'K':
+			case KEY_UP: case 'k': case 'K':{
 				menu.select_previous_item();
 				break;
-			case KEY_DOWN: case 'j': case 'J':
+			}
+			case KEY_DOWN: case 'j': case 'J':{
 				menu.select_next_item();
 				break;
-			case '\n': // case fallthrough is intended
-				mvprintw(5,5, "%s", "please work");
+			}
+			case '\n':{ /* case fallthrough is intended */
+				/*
+				mvprintw(5,5, "selected menu: %d selected item: %d", 
+								this->selected_menu, menu.selected_item);
+				for (int i = 0; i < this->num_menus; ++i) mvprintw(i,0,"%d", menu.selected_item);
 				refresh();
+				*/
+				this->handle_selection(selected_menu, menu.selected_item);
+			}
 			default:
 				is_selected = false;
 				break;

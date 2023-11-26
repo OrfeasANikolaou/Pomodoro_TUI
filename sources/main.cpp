@@ -2,11 +2,8 @@
 #include <ncurses.h>
 #include <ncurses/curses.h>
 #include "../headers//menu.hpp"
-#include "../headers/ncurses_helpers.hpp" // ncurses already included
-enum mfile{new_session, statistics, quit};
-enum mopts{set_timer};
-enum mhelp{about};
-enum m{file, opts, help};
+#include "../headers/ncurses_helpers.hpp"
+#include "../headers/enums.h"
 int main(void){
 	/* START INIT */
 	initscr();
