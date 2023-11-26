@@ -90,7 +90,55 @@ void MenuBar::handle_selection(int menu_id, int choice_id, Pomodoro& pom){
 			switch (choice_id){ /* selects the choice for OPTS menu */
 				case set_timer:{
 //					mvprintw(0,0,"SETTING TIMER");
-					refresh();
+					int menuwin_yBeg = getbegy(this->menu_win);
+					int menuwin_xBeg = getbegx(this->menu_win);
+					int menuwin_yMax = getmaxy(this->menu_win);
+					int menuwin_xMax = getmaxx(this->menu_win);
+
+					WINDOW* settings_window = newwin(menuwin_yMax/2, menuwin_xMax*3/4, 
+																				menuwin_yBeg*2, menuwin_xBeg+20);
+					werase(this->win);
+					wrefresh(this->win);
+					box(this->win, 0,0);
+					wrefresh(this->win);	
+					box(settings_window, 0, 0);
+					std::string sttngs = "SET-TIMER";
+					std::string msg_1 = "Enter hours for working time (0-23): ";
+					std::string msg_2 = "Enter minutes for working time (0-59): ";
+					std::string msg_3 = "Enter hours for break time (0-23): ";
+					std::string msg_4 = "Enter mintes for break time (0-59): ";
+					std::string msg_5 = "Timer is set press any key to continue :)"; // φιλικότητα πρως τον χρήστη
+					int settingswin_xMax = getmaxx(settings_window);
+					int work_h, work_m, break_h, break_m;
+					echo();	
+					mvwprintw(settings_window, 0, settingswin_xMax/2-sttngs.length()/2, "%s", sttngs.c_str());
+					mvwprintw(settings_window, 3, settingswin_xMax/2-msg_1.length(), "%s", msg_1.c_str());	
+					do{
+						mvwprintw(settings_window, 3, settingswin_xMax/2 + 1, "\t\t\t\t\t\t\t");
+						mvwscanw(settings_window, 3, settingswin_xMax/2 + 1, "%d", &work_h);
+					}while(work_h < 0 || 23 < work_h);
+					mvwprintw(settings_window, 6, settingswin_xMax/2-msg_2.length(), "%s", msg_2.c_str());	
+					do{
+						mvwprintw(settings_window, 6, settingswin_xMax/2 + 1, "\t\t\t\t\t\t\t");
+						mvwscanw(settings_window, 6, settingswin_xMax/2 + 1, "%d", &work_m);
+					}while(work_m < 0 || 59 < work_m);
+					mvwprintw(settings_window, 9, settingswin_xMax/2-msg_3.length(), "%s", msg_3.c_str());	
+					do{
+						mvwprintw(settings_window, 9, settingswin_xMax/2 + 1, "\t\t\t\t\t\t\t");
+						mvwscanw(settings_window, 9, settingswin_xMax/2 + 1, "%d", &break_h);
+					}while(break_h < 0 || 23 < break_h);
+					mvwprintw(settings_window,12, settingswin_xMax/2-msg_4.length(), "%s", msg_4.c_str());	
+					do{
+						mvwprintw(settings_window,12, settingswin_xMax/2 + 1, "\t\t\t\t\t\t\t");
+						mvwscanw(settings_window,12, settingswin_xMax/2 + 1, "%d", &break_m);
+					}while(break_m < 0 || 59 < break_m);
+					noecho();
+					mvwprintw(settings_window, 15, settingswin_xMax/2-msg_5.length()/2, "%s", msg_5.c_str());	
+					wrefresh(settings_window);
+			
+					pom = Pomodoro((work_h * 60) + work_m, (break_h * 60) + break_m);	
+					getch();
+
 					break;
 				}
 			}

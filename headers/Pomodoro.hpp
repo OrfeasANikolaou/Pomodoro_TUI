@@ -5,6 +5,7 @@
 class Pomodoro{
 	friend void pomodoro_helper_countdown(bool&, size_t& , WINDOW& , bool flag); // flag decides if break or work
 	friend void pomodoro_helper_pause_resume(bool&, size_t& );
+	friend class MenuBar;
 	public:
 		Pomodoro();
 		Pomodoro(int, int);				/* manages internally the numbers converting them to std::chrono::mins */ 

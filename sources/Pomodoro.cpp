@@ -31,7 +31,7 @@ void pomodoro_helper_countdown(bool& p, int& time, WINDOW* win, bool flag){
 				mins = (time % 3600) / 60; 	 	
 				secs = time % 60;						 
 				mvwprintw(win, yMax/2-4, xMax/2-13,
-									"Time remaining: %02d::%02d::%02d", hrs, mins, secs);
+									"Time remaining: %04d::%02d::%02d", hrs, mins, secs);
 				wrefresh(win);
 				--time;
 				std::this_thread::sleep_for(std::chrono::seconds(1));			
@@ -39,7 +39,7 @@ void pomodoro_helper_countdown(bool& p, int& time, WINDOW* win, bool flag){
 		}
 				mvwprintw(win, yMax/2+4, xMax/2-msg_3.length()/2, "%s", msg_3.c_str());
 				mvwprintw(win, yMax/2-4, xMax/2-13,
-									"Time remaining: %02d::%02d::%02d", hrs, mins, 0);	// ultra mega spaghetti
+									"Time remaining: %04d::%02d::%02d", hrs, mins, 0);	// ultra mega spaghetti
 	}
 	else { // break time
 		mvwprintw(win, yMax/2+4, xMax/2-msg_3.length()/2, "                                    ");
@@ -61,14 +61,14 @@ void pomodoro_helper_countdown(bool& p, int& time, WINDOW* win, bool flag){
 				mins = (time % 3600) / 60; 	 	
 				secs = time % 60;						 
 				mvwprintw(win, yMax/2-4, xMax/2-13,
-									"Time remaining: %02d::%02d::%02d", hrs, mins, secs);
+									"Time remaining: %04d::%02d::%02d", hrs, mins, secs);
 				wrefresh(win);
 				--time;
 				std::this_thread::sleep_for(std::chrono::seconds(1));			
 			
 		}
 				mvwprintw(win, yMax/2-4, xMax/2-13,
-									"Time remaining: %02d::%02d::%02d", hrs, mins, 0);	// ultra mega spaghetti
+									"Time remaining: %04d::%02d::%02d", hrs, mins, 0);	// ultra mega spaghetti
 		
 			mvwprintw(win, yMax/2+3, xMax/2-msg_5.length()/2, "%s", msg_5.c_str());
 	}
@@ -86,11 +86,11 @@ void pomodoro_helper_pause_resume(bool& p, int& time){
 Pomodoro::Pomodoro() : workDuration(std::chrono::minutes(25)), breakDuration(std::chrono::minutes(5)) {}
 Pomodoro::Pomodoro(int wd, int bd){
 	using namespace std::chrono;  
-if (wd < 1) this->workDuration = minutes(1);
+if (wd == 0) this->workDuration = minutes(25);
 else if (wd > 1440) this->workDuration = minutes(1440);
 else this->workDuration = minutes(wd);
 
-if (bd < 1) this->breakDuration = minutes(1);
+if (bd == 0) this->breakDuration = minutes(5);
 else if (bd > 1440) this->breakDuration = minutes(1440);
 else this->breakDuration = minutes(bd);
 }
@@ -99,16 +99,16 @@ else this->breakDuration = minutes(bd);
 void Pomodoro::startSession(WINDOW* w){
 AGAIN:
 	bool paused = false;
-//  int time =  std::chrono::duration_cast<std::chrono::seconds>(this->workDuration).count(); // spaghetti
-	int time = 3601; /* COMMENT ABOVE LINE AND UNCOMMENT THIS ONE FOR TESTING */
+  int time =  std::chrono::duration_cast<std::chrono::seconds>(this->workDuration).count(); // spaghetti
+//	int time = 3601; /* COMMENT ABOVE LINE AND UNCOMMENT THIS ONE FOR TESTING */
 	std::thread countdown_thread1(pomodoro_helper_countdown, std::ref(paused), std::ref(time), std::ref(w), 1);	
 	std::thread pause_resume_thread1(pomodoro_helper_pause_resume, std::ref(paused), std::ref(time));
 	while (! countdown_thread1.joinable());
 	while (! pause_resume_thread1.joinable());
 	countdown_thread1.join();
 	pause_resume_thread1.join();
-	// time = std::chrono::duration_cast<std::chrono::seconds>(this->breakDuration).count(); // more spaghetti
-	time = 3601; /* COMMENT ABOVE LINE AND UNCOMMENT THIS ONE FOR TESTING */
+	time = std::chrono::duration_cast<std::chrono::seconds>(this->breakDuration).count(); // more spaghetti
+	//time = 3601; /* COMMENT ABOVE LINE AND UNCOMMENT THIS ONE FOR TESTING */
 	std::thread countdown_thread2(pomodoro_helper_countdown, std::ref(paused), std::ref(time), std::ref(w), 0);	
 	std::thread pause_resume_thread2(pomodoro_helper_pause_resume, std::ref(paused), std::ref(time));
 	while (! countdown_thread2.joinable());
