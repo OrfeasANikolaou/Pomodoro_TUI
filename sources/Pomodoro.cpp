@@ -149,16 +149,12 @@ bool Pomodoro::endSession(WINDOW* w){
 				++hl;
 				if (hl > n_choices - 1) hl = n_choices - 1;
 				break;
-			case '\n':
-				{ wclear(choice); wrefresh(choice); delwin(choice); ret = true; }
-				goto EXIT;
 			default:
 				break;
 		}
+		if (c == '\n') {wclear(choice); wrefresh(choice); delwin(choice); if (hl == 0) ret = true; break; }
 	}
-EXIT:
 	refresh();
-	wrefresh(choice);
 	return ret;
 }
 // πολυ αστειο ονομα επειδη δεν μπορω να βαλω this ως ονομα, αλλα αναφαιρομαι στο παραθυρο για στατιστικα
