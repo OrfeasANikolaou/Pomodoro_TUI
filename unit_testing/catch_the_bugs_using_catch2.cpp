@@ -34,9 +34,11 @@ TEST_CASE("test_case_pomodoro_constructor_4", "[pomodoro_constructor]"){
 	REQUIRE(obj4.GET_workDuration() == minutes(1440));
 	REQUIRE(obj4.GET_breakDuration() == minutes(1440));
 }
-TEST_CASE("test_case_pomodoro_constructor_5", "[pomodo_constructor]""[default_pomodoro_constructor]"){
+TEST_CASE("test_case_pomodoro_constructor_5", "[pomodoro_constructor]""[default_pomodoro_constructor]"){
 	using namespace std::chrono;
 	Pomodoro obj5;
 	REQUIRE(obj5.GET_breakDuration() == minutes(5));
 	REQUIRE(obj5.GET_workDuration() == minutes(25));
 }
+
+
