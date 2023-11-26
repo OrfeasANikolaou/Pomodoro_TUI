@@ -1,4 +1,5 @@
 #include <iostream>
+#include <ncurses.h>
 #include <ncurses/curses.h>
 #include "../headers//menu.hpp"
 #include "../headers/ncurses_helpers.hpp" // ncurses already included
@@ -36,9 +37,7 @@ int main(void){
 	wrefresh(menu_bar_win);
 	refresh();
 
-	leaveok(stdscr, 1);
-	leaveok(menu_bar_win, 1);
-	leaveok(title_win, 1);
+	curs_set(0);
 	
 	std::string menu_file[] = {"NEW SESSION", "STATISTICS", "QUIT", };
 	std::string menu_opts[] = {"SET TIMER", };
@@ -49,8 +48,9 @@ int main(void){
 										Menu("OPTS", 'o', menu_opts, sizeof(menu_opts) / sizeof(std::string)),
 										Menu("HELP", 'h', menu_help, sizeof(menu_help) / sizeof(std::string)),
 									};
-
+	
 	MenuBar menu_bar(menu_bar_win, menus, sizeof(menus) / sizeof(Menu));
+	
 	menu_bar.draw();
 	int ch;
 	while ( (ch = wgetch(menu_bar_win)) ){

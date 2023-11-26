@@ -20,7 +20,6 @@ MenuBar::MenuBar(WINDOW* w, Menu* m, int n) :
 		for (int i = 0; i < this->num_menus; ++i){
 			this->menus[i].start_x_pos = curr_pos;
 			curr_pos += this->menus[i].text.length() + 1;
-
 		}
 		int yMax, xMax, yBeg, xBeg;
 		getmaxyx(this->win, yMax, xMax);
@@ -31,7 +30,6 @@ MenuBar::MenuBar(WINDOW* w, Menu* m, int n) :
 }
 
 void MenuBar::draw(void){
-
 	for (int i = 0; i < this->num_menus; ++i){
 		this->draw_menu(this->menus[i], this->selected_menu == i);
 	}
