@@ -48,12 +48,13 @@ int main(void){
 									};
 	
 	MenuBar menu_bar(menu_bar_win, menus, sizeof(menus) / sizeof(Menu));
-	
-	menu_bar.draw();
+	Pomodoro tomato;
+
+	menu_bar.draw(tomato);
 	int ch;
 	while ( (ch = wgetch(menu_bar_win)) ){
 		menu_bar.handle_trigger(ch);
-		menu_bar.draw();
+		menu_bar.draw(tomato);
 	}
 
 	delwin(title_win);

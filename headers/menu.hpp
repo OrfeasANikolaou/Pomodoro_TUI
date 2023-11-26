@@ -1,5 +1,6 @@
 #include <ncurses.h>
 #include <string>
+#include "Pomodoro.hpp"
 #ifndef _MENU_HPP
 #define _MENU_HPP
 class Menu{
@@ -20,11 +21,11 @@ class Menu{
 class MenuBar{
 	public:
 		MenuBar(WINDOW* , Menu*, int); /* Specifies in which window exists, what menus is has and how many */ 
-		void draw(void);					
+		void draw(Pomodoro& );					
 		void handle_trigger(int);			 /* handles char given by the user to open specified menu */
-		void handle_selection(int, int); /* handles choice of option by the user, menu_id + opt_id as parameters*/
+		void handle_selection(int, int, Pomodoro&); /* handles choice of option by the user, menu_id + opt_id as parameters*/
 		void reset(void);
-		void draw_menu(Menu, bool);
+		void draw_menu(Menu, bool, Pomodoro& );
 		void draw_menu_items(Menu);
 	private:
 		WINDOW* win;

@@ -1,6 +1,7 @@
 #include "../headers/menu.hpp"
 #include <ncurses/curses.h>
 #include "../headers/enums.h"
+#include "../headers/Pomodoro.hpp"
 Menu::Menu(std::string txt, int trgr, std::string* itms, int n_items) :
 	text(txt), trigger(trgr), items(itms), num_items(n_items), selected_item(0) {}
 
@@ -29,11 +30,11 @@ MenuBar::MenuBar(WINDOW* w, Menu* m, int n) :
 		wrefresh(this->menu_win);
 }
 
-void MenuBar::draw(void){
+void MenuBar::draw(Pomodoro& pom){
 	for (int i = 0; i < this->num_menus; ++i){
 		
 	refresh();
-		this->draw_menu(this->menus[i], this->selected_menu == i);
+		this->draw_menu(this->menus[i], this->selected_menu == i, pom);
 	}
 	this->selected_menu = -1;
 }
@@ -47,13 +48,29 @@ void MenuBar::handle_trigger(int trigger){
 	}
 }
 
-void MenuBar::handle_selection(int menu_id, int choice_id){
+void MenuBar::handle_selection(int menu_id, int choice_id, Pomodoro& pom){
 	switch (menu_id){
 		case file:{
 			switch (choice_id){ /* selects the choice for FILE menu */
 				case new_session:{
-					mvprintw(0,0,"NEW SESSION");
-					refresh();
+					int menuwin_yBeg = getbegy(this->menu_win);
+					int menuwin_xBeg = getbegx(this->menu_win);
+					int menuwin_yMax = getmaxy(this->menu_win);
+					int menuwin_xMax = getmaxx(this->menu_win);
+					int new_yBeg = menuwin_yBeg+menuwin_yMax/4;
+					int new_xBeg = menuwin_xBeg+menuwin_xMax/4;	
+					WINDOW* timer_window = newwin(menuwin_yMax/2+5, menuwin_xMax/2, 
+																				new_yBeg-3, new_xBeg);
+					werase(this->win);
+					wrefresh(this->win);
+					box(this->win, 0,0);
+					wrefresh(this->win);	
+					box(timer_window, 0, 0);
+					std::string cntdwn = "COUNTDOWN";
+					int timerwin_xMax = getmaxx(timer_window);
+					mvwprintw(timer_window, 0, timerwin_xMax/2-cntdwn.length()/2, "%s", cntdwn.c_str());
+					wrefresh(timer_window);
+					pom.startSession(timer_window);
 					break;
 				}
 				case statistics:{
@@ -101,7 +118,7 @@ void MenuBar::reset(void){
 	wrefresh(this->win);
 }
 
-void MenuBar::draw_menu(Menu menu, bool is_selected){
+void MenuBar::draw_menu(Menu menu, bool is_selected, Pomodoro& pom){
 	int start_x = menu.start_x_pos;
 	std::string text = menu.text;
 	if (is_selected) { wattron(this->win, A_STANDOUT); }
@@ -116,7 +133,7 @@ void MenuBar::draw_menu(Menu menu, bool is_selected){
 		switch(ch){
 			case KEY_UP: case 'k': case 'K':{
 				menu.select_previous_item();
-				break;
+				break; 
 			}
 			case KEY_DOWN: case 'j': case 'J':{
 				menu.select_next_item();
@@ -129,7 +146,7 @@ void MenuBar::draw_menu(Menu menu, bool is_selected){
 				for (int i = 0; i < this->num_menus; ++i) mvprintw(i,0,"%d", menu.selected_item);
 				refresh();
 				*/
-				this->handle_selection(selected_menu, menu.selected_item);
+				this->handle_selection(selected_menu, menu.selected_item, pom);
 			}
 			default:
 				is_selected = false;
