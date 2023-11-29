@@ -2,9 +2,7 @@
 #include "../headers/ncurses_helpers.hpp"
 #include <chrono>
 #include <fstream>
-#include <ostream>
 #include <ncurses.h>
-#include <ncurses/curses.h>
 #include <thread>
 #include <iostream>
 

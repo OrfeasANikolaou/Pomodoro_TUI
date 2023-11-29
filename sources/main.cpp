@@ -1,6 +1,5 @@
 #include <iostream>
 #include <ncurses.h>
-#include <ncurses/curses.h>
 #include <fstream>
 #include "../headers//menu.hpp"
 #include "../headers/ncurses_helpers.hpp"

@@ -2,7 +2,7 @@
 #define _POMODORO_HPP
 #include <chrono>
 #include <string>
-#include <ncurses/curses.h>
+#include <ncurses.h>
 class Pomodoro{
 	friend void pomodoro_helper_countdown(bool&, size_t& , WINDOW& , bool flag); // flag decides if break or work
 	friend void pomodoro_helper_pause_resume(bool&, size_t& );
